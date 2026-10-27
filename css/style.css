@@ -1,0 +1,1842 @@
+/* ==========================================================================
+   PORTFÓLIO INTERATIVO — LUCCAS DIAZZI
+   Estética: Retrô Tecnológico / CRT / Cassete / VHS / Glitch Art Experimental
+   Tipografia: Oswald (Google Fonts)
+   Paleta: Neutros (#050505, #DAD7D0, #FFFFFF, tons de cinza)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Variáveis e Design Tokens
+   -------------------------------------------------------------------------- */
+:root {
+  /* Paleta Oficial */
+  --color-bg: #050505;
+  --color-text-main: #FFFFFF;
+  --color-text-secondary: #DAD7D0;
+  --color-accent-dim: #8e8b82;
+  --color-border-dark: #1c1c1c;
+  --color-border-mid: #333333;
+  --color-border-light: #555555;
+  --color-surface-dark: #0d0d0d;
+  --color-surface-panel: #141414;
+  --color-surface-hover: #1e1e1e;
+  
+  /* Indicadores e Detalhes Técnicos */
+  --led-green: #39ff14;
+  --led-amber: #ffaa00;
+  --led-dim: #224422;
+
+  /* Tipografia */
+  --font-main: 'Oswald', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: 'Consolas', 'Courier New', monospace;
+
+  /* Transições e Curvas */
+  --ease-mechanical: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.4s var(--ease-smooth);
+  --transition-cinematic: 1.2s var(--ease-mechanical);
+
+  /* Dimensões Globais */
+  --crt-radius: 18px;
+  --screen-aspect: 4 / 3;
+}
+
+/* --------------------------------------------------------------------------
+   2. Reset e Estilos Globais
+   -------------------------------------------------------------------------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--color-bg);
+  color: var(--color-text-main);
+  font-family: var(--font-main);
+  font-optical-sizing: auto;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  outline: none;
+}
+
+button:focus-visible, a:focus-visible {
+  outline: 2px solid var(--color-text-main);
+  outline-offset: 3px;
+}
+
+/* --------------------------------------------------------------------------
+   3. Efeitos Globais CRT, Scanlines e Ruído Analógico
+   -------------------------------------------------------------------------- */
+.crt-overlay {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+/* Linhas de Varredura (Scanlines) */
+.crt-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%,
+    rgba(0, 0, 0, 0.35) 50%
+  );
+  background-size: 100% 4px;
+  opacity: 0.75;
+}
+
+/* Efeito de Vidro Curvado e Reflexo */
+.crt-overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 35% 25%,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.01) 50%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.9);
+}
+
+/* Camada de Ruído Estático (Grão) */
+.crt-noise {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  opacity: 0.045;
+  z-index: 900;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* --------------------------------------------------------------------------
+   4. Viewport da Cena 3D & Câmera Virtual
+   -------------------------------------------------------------------------- */
+.scene-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 1400px;
+  background: radial-gradient(circle at center, #111111 0%, #050505 85%);
+  overflow: hidden;
+}
+
+/* Câmera Cinemática */
+.camera-rig {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform var(--transition-cinematic);
+  will-change: transform;
+}
+
+/* Estados da Câmera:
+   1. camera--initial: Zoom total na tela (Protetor de tela LD preenche a visão)
+   2. camera--pulled-back: Revela o computador físico e o toca-fitas ao lado
+   3. camera--screen-focused: Câmera centralizada e focada na tela do monitor interativo
+*/
+.camera-rig.camera--initial {
+  transform: translateZ(620px) scale(1.4);
+}
+
+.camera-rig.camera--pulled-back {
+  transform: translateZ(0px) scale(1);
+}
+
+.camera-rig.camera--screen-focused {
+  transform: translateZ(320px) translateX(90px) scale(1.15);
+}
+
+/* Mesa / Ambiente de Apoio */
+.desk-surface {
+  position: absolute;
+  bottom: -40px;
+  width: 160%;
+  height: 240px;
+  background: linear-gradient(to bottom, #0a0a0a, #030303);
+  border-top: 1px solid var(--color-border-dark);
+  transform: rotateX(80deg);
+  transform-origin: bottom center;
+  box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.95);
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   5. Estrutura do Setup Físico: Monitor CRT + Toca-Fitas
+   -------------------------------------------------------------------------- */
+.hardware-setup {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 36px;
+  transform-style: preserve-3d;
+  z-index: 10;
+  max-width: 1200px;
+  width: 95%;
+  padding-bottom: 20px;
+}
+
+/* ==========================================================================
+   MONITOR CRT (Chassis & Componentes)
+   ========================================================================== */
+.crt-monitor-case {
+  position: relative;
+  width: clamp(340px, 58vw, 720px);
+  aspect-ratio: 1.15;
+  background: linear-gradient(145deg, #181818 0%, #0d0d0d 60%, #080808 100%);
+  border: 2px solid var(--color-border-mid);
+  border-radius: 28px;
+  padding: 22px 22px 42px 22px;
+  box-shadow: 
+    0 30px 80px rgba(0, 0, 0, 0.95),
+    inset 0 2px 4px rgba(255, 255, 255, 0.1),
+    inset 0 -4px 10px rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  transform-style: preserve-3d;
+  transition: transform var(--transition-normal);
+}
+
+/* Grades de Ventilação no Topo do Monitor */
+.crt-monitor-case::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  left: 20%;
+  right: 20%;
+  height: 6px;
+  background: repeating-linear-gradient(
+    90deg,
+    #050505,
+    #050505 4px,
+    #252525 4px,
+    #252525 8px
+  );
+  border-radius: 3px;
+  opacity: 0.6;
+}
+
+/* Moldura Interna Chanfrada da Tela */
+.crt-bezel-inner {
+  position: relative;
+  flex: 1;
+  background: #080808;
+  border-radius: var(--crt-radius);
+  padding: 10px;
+  box-shadow: 
+    inset 4px 4px 14px rgba(0, 0, 0, 0.95),
+    inset -3px -3px 8px rgba(255, 255, 255, 0.05),
+    0 1px 2px rgba(255, 255, 255, 0.1);
+  display: flex;
+  overflow: hidden;
+}
+
+/* Tela de Vidro CRT (Display Real) */
+.crt-screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-bg);
+  border-radius: calc(var(--crt-radius) - 6px);
+  overflow: hidden;
+  box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.85);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Painel de Controle Inferior do Monitor */
+.crt-control-panel {
+  position: absolute;
+  bottom: 8px;
+  left: 24px;
+  right: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.crt-brand-badge {
+  font-size: 0.72rem;
+  letter-spacing: 3px;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  opacity: 0.8;
+  border-bottom: 1px solid var(--color-border-light);
+  padding-bottom: 1px;
+}
+
+.crt-knobs-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.crt-knob {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #333333, #151515);
+  border: 1px solid var(--color-border-mid);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+
+.crt-power-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.65rem;
+  letter-spacing: 1px;
+  color: var(--color-accent-dim);
+}
+
+.crt-led {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--led-green);
+  box-shadow: 0 0 8px var(--led-green);
+  animation: ledPulse 4s infinite alternate;
+}
+
+@keyframes ledPulse {
+  0% { opacity: 0.8; }
+  100% { opacity: 1; filter: drop-shadow(0 0 4px var(--led-green)); }
+}
+
+/* ==========================================================================
+   TOCA-FITAS (Aparelho Cassete Deck)
+   ========================================================================== */
+.tape-deck-unit {
+  position: relative;
+  width: clamp(240px, 28vw, 340px);
+  height: 380px;
+  background: linear-gradient(160deg, #161616 0%, #0e0e0e 55%, #080808 100%);
+  border: 2px solid var(--color-border-mid);
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 
+    0 24px 70px rgba(0, 0, 0, 0.95),
+    inset 0 1px 2px rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transform-style: preserve-3d;
+  transition: opacity var(--transition-normal), transform var(--transition-normal);
+}
+
+/* Cabeçalho do Deck */
+.deck-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--color-border-dark);
+  padding-bottom: 10px;
+}
+
+.deck-model-tag {
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.deck-vu-meter {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+
+.vu-bar {
+  width: 4px;
+  height: 12px;
+  background-color: #222222;
+  border-radius: 1px;
+}
+
+.vu-bar.active {
+  background-color: var(--color-text-secondary);
+  box-shadow: 0 0 4px rgba(218, 215, 208, 0.4);
+}
+
+/* Compartimento / Well do Cassete */
+.deck-compartment {
+  position: relative;
+  width: 100%;
+  height: 190px;
+  background: #090909;
+  border: 2px solid var(--color-border-dark);
+  border-radius: 8px;
+  box-shadow: inset 0 8px 24px rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+/* Janela de Vidro do Compartimento */
+.compartment-glass {
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0.6) 100%);
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Linha de Medição da Fita */
+.compartment-scale {
+  position: absolute;
+  bottom: 8px;
+  left: 20px;
+  right: 20px;
+  height: 4px;
+  background: repeating-linear-gradient(90deg, #333333, #333333 2px, transparent 2px, transparent 8px);
+  opacity: 0.5;
+}
+
+/* Rotores / Engrenagens do Toca-Fitas */
+.deck-spindles {
+  position: absolute;
+  width: 70%;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+  opacity: 0.35;
+}
+
+.spindle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px dashed #444444;
+  background: #111111;
+  animation: spinReel 6s linear infinite;
+}
+
+@keyframes spinReel {
+  100% { transform: rotate(360deg); }
+}
+
+/* Botões Mecânicos do Deck */
+.deck-controls {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.deck-btn {
+  flex: 1;
+  height: 32px;
+  background: linear-gradient(to bottom, #242424, #121212);
+  border: 1px solid var(--color-border-mid);
+  border-radius: 4px;
+  color: var(--color-accent-dim);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 0 #070707, 0 4px 6px rgba(0, 0, 0, 0.6);
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.deck-btn:active, .deck-btn.pressed {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #070707;
+  color: var(--color-text-main);
+  background: #151515;
+}
+
+/* ==========================================================================
+   FITA CASSETE DE INTRODUÇÃO (Fita Luccas Diazzi)
+   ========================================================================== */
+.intro-cassette-wrapper {
+  position: absolute;
+  width: 210px;
+  height: 130px;
+  z-index: 20;
+  transition: transform 1.2s var(--ease-mechanical), opacity 0.5s ease;
+  cursor: pointer;
+}
+
+/* Estado 1: Fita emergindo para cima */
+.intro-cassette-wrapper.tape--emerging {
+  transform: translateY(-90px);
+  animation: floatEmerging 3s ease-in-out infinite alternate;
+}
+
+@keyframes floatEmerging {
+  0% { transform: translateY(-90px); }
+  100% { transform: translateY(-102px); }
+}
+
+/* Estado 2: Fita sendo inserida no deck */
+.intro-cassette-wrapper.tape--inserting {
+  transform: translateY(0px) scale(0.96);
+  pointer-events: none;
+  animation: insertDown 0.85s var(--ease-mechanical) forwards;
+}
+
+@keyframes insertDown {
+  0% { transform: translateY(-90px) scale(1); }
+  60% { transform: translateY(10px) scale(0.97); }
+  100% { transform: translateY(0px) scale(0.95); opacity: 0.85; }
+}
+
+/* Aparência Física da Fita Cassete */
+.cassette-shell {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #1f1f1f 0%, #111111 50%, #0a0a0a 100%);
+  border: 2px solid var(--color-border-light);
+  border-radius: 8px;
+  padding: 8px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.9), inset 0 1px 2px rgba(255, 255, 255, 0.15);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Etiqueta Superior / Lombada da Fita */
+.cassette-spine-label {
+  background: var(--color-text-secondary);
+  color: var(--color-bg);
+  padding: 4px 8px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.spine-artist-name {
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #050505;
+}
+
+.spine-tape-type {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  padding: 1px 4px;
+  border: 1px solid #050505;
+  border-radius: 2px;
+}
+
+/* Janela Central dos Carretéis da Fita */
+.cassette-window-zone {
+  position: relative;
+  height: 52px;
+  background: #080808;
+  border: 1px solid var(--color-border-mid);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 16px;
+}
+
+.tape-hub {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 4px solid var(--color-border-light);
+  background: radial-gradient(circle, #2b2b2b 40%, #151515 80%);
+}
+
+.tape-bridge {
+  position: relative;
+  width: 65px;
+  height: 14px;
+  background: #151515;
+  border: 1px solid #333333;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.55rem;
+  color: var(--color-accent-dim);
+  letter-spacing: 1px;
+}
+
+/* Indicador de Ação "Clique para Inserir" */
+.cassette-prompt-badge {
+  position: absolute;
+  top: -36px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-text-main);
+  color: var(--color-bg);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  padding: 4px 10px;
+  border-radius: 3px;
+  white-space: nowrap;
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+  animation: promptBlink 1.4s infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes promptBlink {
+  0% { transform: translateX(-50%) translateY(0); opacity: 0.85; }
+  100% { transform: translateX(-50%) translateY(-4px); opacity: 1; }
+}
+
+/* ==========================================================================
+   6. ANIMAÇÃO INICIAL — LOGO LD (Estilo DVD Screensaver)
+   ========================================================================== */
+.boot-screen-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  background-color: var(--color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: opacity 0.8s ease;
+}
+
+.boot-screen-layer.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Container de Limites do Bouncing Logo */
+.dvd-bounce-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* O Logo "LD" que Quica nas Bordas */
+.ld-bouncing-logo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  padding: 10px 18px;
+  border: 3px solid var(--color-text-main);
+  background: rgba(5, 5, 5, 0.9);
+  color: var(--color-text-main);
+  font-size: clamp(2.4rem, 6vw, 4.2rem);
+  font-weight: 700;
+  letter-spacing: 6px;
+  line-height: 1;
+  border-radius: 4px;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  will-change: transform;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+}
+
+.ld-bouncing-logo .sub-tag {
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-left: 6px;
+}
+
+/* Botão Discreto de Pular Animação (Acessibilidade) */
+.skip-intro-btn {
+  position: absolute;
+  bottom: 14px;
+  right: 14px;
+  z-index: 45;
+  font-size: 0.68rem;
+  letter-spacing: 2px;
+  color: var(--color-accent-dim);
+  background: rgba(15, 15, 15, 0.8);
+  border: 1px solid var(--color-border-mid);
+  padding: 4px 10px;
+  border-radius: 2px;
+  transition: all var(--transition-fast);
+}
+
+.skip-intro-btn:hover {
+  color: var(--color-text-main);
+  border-color: var(--color-text-main);
+  background: #222222;
+}
+
+/* ==========================================================================
+   7. INTERFACE INTERNA DO COMPUTADOR (OS)
+   ========================================================================== */
+.os-interface-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg);
+  color: var(--color-text-main);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.6s var(--ease-smooth), visibility 0.6s;
+  z-index: 30;
+}
+
+.os-interface-wrapper.is-active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Barra de Status Superior (OSD Digital) */
+.os-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--color-border-dark);
+  background: rgba(10, 10, 10, 0.85);
+  font-size: 0.72rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  z-index: 35;
+}
+
+.status-left, .status-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.system-tag {
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+.session-counter {
+  color: var(--color-accent-dim);
+  font-family: var(--font-mono);
+}
+
+.digital-clock {
+  color: var(--color-text-main);
+  font-weight: 600;
+  font-family: var(--font-mono);
+  background: #111111;
+  padding: 2px 6px;
+  border: 1px solid var(--color-border-mid);
+  border-radius: 2px;
+}
+
+/* Área Principal de Navegação (Carrossel) */
+.os-main-stage {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 10px 16px;
+}
+
+.carousel-instruction-bar {
+  position: absolute;
+  top: 14px;
+  font-size: 0.7rem;
+  letter-spacing: 3px;
+  color: var(--color-accent-dim);
+  text-transform: uppercase;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   8. CARROSSEL CIRCULAR 3D DE FITAS CASSETE
+   ========================================================================== */
+.carousel-viewport {
+  position: relative;
+  width: 100%;
+  height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 1000px;
+  touch-action: pan-y pinch-zoom;
+}
+
+.carousel-track {
+  position: relative;
+  width: 250px;
+  height: 270px;
+  transform-style: preserve-3d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Item de Fita do Carrossel */
+.carousel-card {
+  position: absolute;
+  width: 240px;
+  height: 270px;
+  transition: transform 0.45s var(--ease-smooth), opacity 0.45s, filter 0.45s;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+}
+
+/* Posicionamentos 3D dos 3 Itens:
+   - Index 0: Central
+   - Index 1: Direita
+   - Index 2: Esquerda
+*/
+.carousel-card.pos-center {
+  transform: translateX(0px) translateZ(60px) rotateY(0deg) scale(1.05);
+  opacity: 1;
+  z-index: 10;
+  filter: brightness(1.05) drop-shadow(0 15px 30px rgba(0, 0, 0, 0.9));
+}
+
+.carousel-card.pos-right {
+  transform: translateX(180px) translateZ(-80px) rotateY(-32deg) scale(0.85);
+  opacity: 0.55;
+  z-index: 5;
+  filter: brightness(0.65) drop-shadow(0 10px 20px rgba(0, 0, 0, 0.7));
+}
+
+.carousel-card.pos-left {
+  transform: translateX(-180px) translateZ(-80px) rotateY(32deg) scale(0.85);
+  opacity: 0.55;
+  z-index: 5;
+  filter: brightness(0.65) drop-shadow(0 10px 20px rgba(0, 0, 0, 0.7));
+}
+
+.carousel-card:hover.pos-center {
+  transform: translateX(0px) translateZ(80px) rotateY(0deg) scale(1.08);
+}
+
+.carousel-card:hover.pos-right, .carousel-card:hover.pos-left {
+  opacity: 0.8;
+  filter: brightness(0.85);
+}
+
+/* ==========================================================================
+   DESIGN GRÁFICO DAS 3 CAPAS DE FITA
+   ========================================================================== */
+.tape-case-art {
+  width: 100%;
+  height: 100%;
+  background: #0d0d0d;
+  border: 2px solid var(--color-border-light);
+  border-radius: 6px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 
+    0 10px 25px rgba(0, 0, 0, 0.85),
+    inset 0 0 20px rgba(0, 0, 0, 0.9);
+  position: relative;
+  overflow: hidden;
+}
+
+.tape-case-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 50%, rgba(0,0,0,0.5) 100%);
+  pointer-events: none;
+}
+
+/* FITA 1: SOBRE MIM — Visual Estilo Álbum Musical Experimental */
+.tape-about .tape-case-art {
+  background: radial-gradient(circle at top right, #1a1a1a 0%, #080808 85%);
+  border-color: #555555;
+}
+
+.tape-about .album-header {
+  border-bottom: 2px solid var(--color-text-main);
+  padding-bottom: 6px;
+}
+
+.tape-about .album-title {
+  font-size: 1.55rem;
+  font-weight: 700;
+  letter-spacing: 4px;
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--color-text-main);
+}
+
+.tape-about .album-subtitle {
+  font-size: 0.65rem;
+  letter-spacing: 2.5px;
+  color: var(--color-text-secondary);
+  margin-top: 4px;
+}
+
+.tape-about .album-graphic {
+  position: relative;
+  height: 100px;
+  border: 1px solid var(--color-border-mid);
+  background: repeating-linear-gradient(
+    45deg,
+    #0d0d0d,
+    #0d0d0d 6px,
+    #171717 6px,
+    #171717 12px
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+}
+
+.tape-about .album-monogram {
+  font-size: 2.8rem;
+  font-weight: 800;
+  letter-spacing: 8px;
+  color: var(--color-text-secondary);
+  border: 2px solid var(--color-text-secondary);
+  padding: 0 10px;
+}
+
+.tape-about .album-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  border-top: 1px dashed var(--color-border-mid);
+  padding-top: 8px;
+  font-size: 0.65rem;
+  color: var(--color-accent-dim);
+}
+
+/* FITA 2: PORTFÓLIO — Visual Equipamento Eletrônico / Fita de Dados */
+.tape-portfolio .tape-case-art {
+  background: #0c0c0c;
+  border-color: #666666;
+}
+
+.tape-portfolio .spec-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  background: var(--color-text-secondary);
+  color: #050505;
+  padding: 4px 6px;
+  border-radius: 2px;
+}
+
+.tape-portfolio .spec-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  line-height: 1;
+}
+
+.tape-portfolio .spec-serial {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: bold;
+}
+
+.tape-portfolio .data-graphic {
+  height: 95px;
+  border: 1px solid var(--color-border-mid);
+  background: #080808;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 8px;
+}
+
+.tape-portfolio .waveform-lines {
+  height: 40px;
+  background: repeating-linear-gradient(
+    90deg,
+    #222222,
+    #222222 3px,
+    transparent 3px,
+    transparent 6px
+  );
+  border-bottom: 1px solid var(--color-border-mid);
+}
+
+.tape-portfolio .tech-specs-list {
+  font-size: 0.6rem;
+  letter-spacing: 1px;
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  line-height: 1.4;
+}
+
+.tape-portfolio .spec-footer {
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--color-accent-dim);
+  text-align: right;
+  border-top: 1px solid var(--color-border-dark);
+  padding-top: 6px;
+}
+
+/* FITA 3: CONTATO — Visual Minimalista com Ícone de Comunicação */
+.tape-contact .tape-case-art {
+  background: #0a0a0a;
+  border-color: #555555;
+}
+
+.tape-contact .comm-header {
+  border-bottom: 1px solid var(--color-border-light);
+  padding-bottom: 6px;
+}
+
+.tape-contact .comm-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--color-text-main);
+}
+
+.tape-contact .comm-graphic {
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border-mid);
+  background: #060606;
+}
+
+.tape-contact .comm-icon-box {
+  width: 48px;
+  height: 48px;
+  border: 2px solid var(--color-text-secondary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  color: var(--color-text-secondary);
+}
+
+.tape-contact .comm-icon-box svg {
+  width: 100%;
+  height: 100%;
+}
+
+.tape-contact .comm-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  color: var(--color-accent-dim);
+  letter-spacing: 2px;
+  border-top: 1px solid var(--color-border-dark);
+  padding-top: 6px;
+}
+
+/* Indicadores de Paginação do Carrossel */
+.carousel-controls-bar {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 14px;
+}
+
+.carousel-nav-btn {
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+  padding: 4px 12px;
+  background: #111111;
+  border: 1px solid var(--color-border-mid);
+  border-radius: 3px;
+  color: var(--color-text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.carousel-nav-btn:hover {
+  background: #222222;
+  color: var(--color-text-main);
+  border-color: var(--color-text-main);
+}
+
+.carousel-dots {
+  display: flex;
+  gap: 8px;
+}
+
+.carousel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #333333;
+  transition: all var(--transition-fast);
+}
+
+.carousel-dot.active {
+  background: var(--color-text-main);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.6);
+}
+
+/* ==========================================================================
+   9. INTERFACE DAS SEÇÕES INDIVIDUAIS (Sobre mim, Portfólio, Contato)
+   ========================================================================== */
+.section-view-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-bg);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 24px;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.96);
+  transition: opacity 0.4s var(--ease-smooth), transform 0.4s var(--ease-smooth);
+  overflow-y: auto;
+}
+
+.section-view-overlay.is-active {
+  opacity: 1;
+  pointer-events: all;
+  transform: scale(1);
+}
+
+/* Barra de Navegação Interna da Seção */
+.section-nav-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--color-border-mid);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.section-breadcrumb {
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  color: var(--color-accent-dim);
+  text-transform: uppercase;
+}
+
+.section-breadcrumb span {
+  color: var(--color-text-main);
+  font-weight: 600;
+}
+
+.section-back-btn {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--color-text-secondary);
+  background: #141414;
+  border: 1px solid var(--color-border-mid);
+  padding: 6px 14px;
+  border-radius: 3px;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.section-back-btn:hover {
+  background: #252525;
+  color: var(--color-text-main);
+  border-color: var(--color-text-main);
+  transform: translateX(-2px);
+}
+
+/* Conteúdo Individual das Seções */
+.section-content-panel {
+  display: none;
+  flex: 1;
+  animation: fadeInContent 0.5s var(--ease-smooth) forwards;
+}
+
+.section-content-panel.is-visible {
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes fadeInContent {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --------------------------------------------------------------------------
+   Seção 1: SOBRE MIM
+   -------------------------------------------------------------------------- */
+.about-grid-layout {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.profile-photo-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  background: #0f0f0f;
+  border: 2px solid var(--color-border-light);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.8);
+}
+
+.profile-photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(100%) contrast(110%);
+  display: block;
+}
+
+.profile-photo-badge {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(5, 5, 5, 0.85);
+  border-top: 1px solid var(--color-border-mid);
+  font-size: 0.6rem;
+  letter-spacing: 1.5px;
+  text-align: center;
+  padding: 3px 0;
+  color: var(--color-text-secondary);
+}
+
+.about-details-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.about-name-title {
+  font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: 3px;
+  line-height: 1.1;
+  text-transform: uppercase;
+  color: var(--color-text-main);
+}
+
+.about-role-subtitle {
+  font-size: 1.05rem;
+  font-weight: 500;
+  letter-spacing: 2px;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  border-left: 3px solid var(--color-text-main);
+  padding-left: 8px;
+}
+
+.about-bio-text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  font-weight: 300;
+  letter-spacing: 0.5px;
+  max-width: 600px;
+}
+
+.about-skills-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.skill-tag {
+  font-size: 0.68rem;
+  letter-spacing: 1px;
+  color: var(--color-accent-dim);
+  background: #111111;
+  border: 1px solid var(--color-border-dark);
+  padding: 3px 8px;
+  border-radius: 2px;
+  font-family: var(--font-mono);
+}
+
+/* --------------------------------------------------------------------------
+   Seção 2: PORTFÓLIO
+   -------------------------------------------------------------------------- */
+.portfolio-minimal-layout {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 20px;
+  padding: 20px 10px;
+}
+
+.portfolio-header-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.portfolio-main-heading {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
+.portfolio-sub-description {
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+}
+
+.github-link-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: linear-gradient(145deg, #131313, #090909);
+  border: 1px solid var(--color-border-light);
+  border-radius: 8px;
+  padding: 22px 36px;
+  transition: all var(--transition-normal);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  max-width: 440px;
+  width: 100%;
+}
+
+.github-link-card:hover {
+  border-color: var(--color-text-main);
+  background: #181818;
+  transform: translateY(-4px);
+  box-shadow: 0 15px 40px rgba(255, 255, 255, 0.1);
+}
+
+.github-icon-frame {
+  width: 46px;
+  height: 46px;
+  color: var(--color-text-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.github-icon-frame svg {
+  width: 100%;
+  height: 100%;
+}
+
+.github-info-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.github-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--color-text-main);
+}
+
+.github-url-text {
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+  letter-spacing: 1px;
+  font-family: var(--font-mono);
+  word-break: break-all;
+}
+
+.github-action-indicator {
+  font-size: 0.68rem;
+  letter-spacing: 2px;
+  color: var(--color-accent-dim);
+  margin-top: 4px;
+}
+
+/* --------------------------------------------------------------------------
+   Seção 3: CONTATO
+   -------------------------------------------------------------------------- */
+.contact-minimal-layout {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 24px;
+  padding: 20px 10px;
+}
+
+.contact-header-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.contact-main-heading {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
+.contact-sub-description {
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+}
+
+.email-contact-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: linear-gradient(145deg, #131313, #090909);
+  border: 1px solid var(--color-border-light);
+  border-radius: 8px;
+  padding: 22px 34px;
+  transition: all var(--transition-normal);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  max-width: 460px;
+  width: 100%;
+}
+
+.email-contact-card:hover {
+  border-color: var(--color-text-main);
+  background: #181818;
+  transform: translateY(-4px);
+  box-shadow: 0 15px 40px rgba(255, 255, 255, 0.1);
+}
+
+.email-icon-frame {
+  width: 44px;
+  height: 44px;
+  color: var(--color-text-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.email-icon-frame svg {
+  width: 100%;
+  height: 100%;
+}
+
+.email-info-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.email-label-text {
+  font-size: 0.72rem;
+  letter-spacing: 2px;
+  color: var(--color-accent-dim);
+  text-transform: uppercase;
+}
+
+.email-address-link {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--color-text-main);
+  font-family: var(--font-mono);
+  word-break: break-all;
+}
+
+.email-copy-btn {
+  margin-top: 4px;
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-mid);
+  padding: 2px 8px;
+  border-radius: 2px;
+  background: #111111;
+  transition: all var(--transition-fast);
+}
+
+.email-copy-btn:hover {
+  background: #252525;
+  color: var(--color-text-main);
+}
+
+/* ==========================================================================
+   10. EFEITOS DE TRANSIÇÃO GLITCH & SINAL DE VÍDEO
+   ========================================================================== */
+.glitch-flash-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0;
+}
+
+.glitch-active {
+  animation: crtGlitchBurst 0.5s steps(2, start) forwards;
+}
+
+@keyframes crtGlitchBurst {
+  0% {
+    opacity: 0.9;
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(4px) skewX(2deg);
+    filter: drop-shadow(-3px 0 #ff0055) drop-shadow(3px 0 #00ffff);
+  }
+  20% {
+    opacity: 0.7;
+    transform: translateX(-6px) scaleY(1.02);
+    clip-path: inset(20% 0 35% 0);
+  }
+  40% {
+    opacity: 0.85;
+    transform: translateX(5px) skewX(-2deg);
+    clip-path: inset(55% 0 10% 0);
+    filter: drop-shadow(3px 0 #ff0055) drop-shadow(-3px 0 #00ffff);
+  }
+  60% {
+    opacity: 0.6;
+    transform: translateX(-2px);
+    clip-path: inset(10% 0 60% 0);
+  }
+  80% {
+    opacity: 0.3;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: none;
+    clip-path: none;
+    filter: none;
+  }
+}
+
+/* ==========================================================================
+   11. PÁGINA DE ERRO 404 (Estilos Dedicados)
+   ========================================================================== */
+.error-404-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.error-404-monitor {
+  position: relative;
+  width: clamp(320px, 90vw, 840px);
+  aspect-ratio: 1.2;
+  background: #0d0d0d;
+  border: 3px solid var(--color-border-mid);
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.95);
+  display: flex;
+}
+
+.error-404-screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #050505;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 24px;
+}
+
+.error-404-content {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* O Grande Número 404 */
+.massive-404-number {
+  font-size: clamp(6.5rem, 20vw, 15rem);
+  font-weight: 800;
+  line-height: 0.85;
+  letter-spacing: -2px;
+  color: var(--color-text-main);
+  text-shadow: 
+    -2px 0 rgba(255, 0, 85, 0.6),
+    2px 0 rgba(0, 255, 255, 0.6);
+  user-select: none;
+  animation: subtleDrift 6s ease-in-out infinite alternate;
+}
+
+@keyframes subtleDrift {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.02); }
+}
+
+.error-status-label {
+  font-size: clamp(0.9rem, 2vw, 1.4rem);
+  font-weight: 600;
+  letter-spacing: 5px;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  margin-top: 10px;
+}
+
+.error-back-link {
+  margin-top: 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: #050505;
+  background: var(--color-text-main);
+  padding: 8px 24px;
+  border-radius: 3px;
+  transition: all var(--transition-fast);
+  display: inline-block;
+}
+
+.error-back-link:hover {
+  background: var(--color-text-secondary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.4);
+}
+
+/* Segunda Etapa: Padrão SMPTE Color Bars (Perda de Sinal) */
+.smpte-bars-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.smpte-bars-overlay.is-active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.smpte-top-row {
+  flex: 3;
+  display: flex;
+}
+
+.smpte-bar {
+  flex: 1;
+  height: 100%;
+}
+
+/* Cores Canônicas SMPTE Analógicas */
+.bar-white   { background-color: #c0c0c0; }
+.bar-yellow  { background-color: #c0c000; }
+.bar-cyan    { background-color: #00c0c0; }
+.bar-green   { background-color: #00c000; }
+.bar-magenta { background-color: #c000c0; }
+.bar-red     { background-color: #c00000; }
+.bar-blue    { background-color: #0000c0; }
+
+.smpte-bottom-row {
+  flex: 1;
+  display: flex;
+}
+
+.smpte-bottom-row .sub-1 { flex: 1; background: #0000c0; }
+.smpte-bottom-row .sub-2 { flex: 1; background: #131313; }
+.smpte-bottom-row .sub-3 { flex: 1; background: #c000c0; }
+.smpte-bottom-row .sub-4 { flex: 1; background: #131313; }
+.smpte-bottom-row .sub-5 { flex: 1; background: #00c0c0; }
+.smpte-bottom-row .sub-6 { flex: 1; background: #131313; }
+.smpte-bottom-row .sub-7 { flex: 1; background: #c0c0c0; }
+
+.no-signal-badge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #000000;
+  border: 2px solid #ffffff;
+  color: #ffffff;
+  padding: 10px 20px;
+  font-size: 1.2rem;
+  letter-spacing: 4px;
+  font-weight: 700;
+  text-align: center;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.9);
+}
+
+/* ==========================================================================
+   12. RESPONSIVIDADE (Tablets e Dispositivos Móveis)
+   ========================================================================== */
+@media (max-width: 900px) {
+  .hardware-setup {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding-bottom: 40px;
+  }
+
+  .camera-rig.camera--initial {
+    transform: translateZ(500px) scale(1.3);
+  }
+
+  .camera-rig.camera--pulled-back {
+    transform: translateZ(-80px) scale(0.92);
+  }
+
+  .camera-rig.camera--screen-focused {
+    transform: translateZ(120px) translateX(0px) scale(1.05);
+  }
+
+  .crt-monitor-case {
+    width: 92vw;
+    aspect-ratio: 1.1;
+  }
+
+  .tape-deck-unit {
+    width: min(320px, 85vw);
+    height: 240px;
+  }
+
+  .deck-compartment {
+    height: 120px;
+  }
+
+  .intro-cassette-wrapper {
+    width: 170px;
+    height: 105px;
+  }
+
+  .about-grid-layout {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .profile-photo-wrapper {
+    width: 130px;
+    margin: 0 auto;
+  }
+
+  .about-role-subtitle {
+    border-left: none;
+    padding-left: 0;
+  }
+
+  .about-skills-tags {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 600px) {
+  .crt-monitor-case {
+    padding: 14px 14px 34px 14px;
+    border-radius: 18px;
+  }
+
+  .os-status-bar {
+    padding: 6px 10px;
+    font-size: 0.65rem;
+  }
+
+  .system-tag {
+    display: none;
+  }
+
+  .carousel-card {
+    width: 200px;
+    height: 235px;
+  }
+
+  .carousel-card.pos-right {
+    transform: translateX(110px) translateZ(-60px) rotateY(-26deg) scale(0.8);
+  }
+
+  .carousel-card.pos-left {
+    transform: translateX(-110px) translateZ(-60px) rotateY(26deg) scale(0.8);
+  }
+
+  .github-link-card, .email-contact-card {
+    padding: 16px 20px;
+    gap: 14px;
+  }
+
+  .section-view-overlay {
+    padding: 12px 14px;
+  }
+}
+
+/* ==========================================================================
+   13. ACESSIBILIDADE — prefers-reduced-motion
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .camera-rig {
+    transition: none !important;
+  }
+
+  .glitch-active {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+
+  .ld-bouncing-logo {
+    animation: none !important;
+  }
+}

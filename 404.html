@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 — Sinal Não Encontrado | Luccas Diazzi</title>
+  <meta name="description" content="Erro 404 - Página não encontrada. Sinal de vídeo analógico interrompido.">
+  <meta name="theme-color" content="#050505">
+
+  <!-- Google Fonts: Oswald (conforme especificado) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap" rel="stylesheet">
+
+  <!-- Folha de Estilos Principal Compartilhada -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Camada Global de Ruído Estático Analógico -->
+  <div class="crt-noise" aria-hidden="true"></div>
+
+  <main class="error-404-container">
+    
+    <div class="error-404-monitor" role="region" aria-label="Monitor de Erro 404">
+      <div class="error-404-screen" id="error-screen">
+        
+        <!-- Scanlines e Reflexo CRT -->
+        <div class="crt-overlay" aria-hidden="true"></div>
+
+        <!-- Camada de Glitch -->
+        <div class="glitch-flash-layer" id="glitch-layer" aria-hidden="true"></div>
+
+        <!-- Barra Superior OSD -->
+        <header class="os-status-bar" style="border: none; background: transparent; padding: 0;">
+          <span class="system-tag">ERR // SIGNAL TERMINATED</span>
+          <span class="session-counter" id="session-display">ERR 00:00:00</span>
+          <span class="digital-clock" id="clock-display">00:00:00</span>
+        </header>
+
+        <!-- Conteúdo Principal do Erro 404 -->
+        <div class="error-404-content">
+          <h1 class="massive-404-number" aria-label="Erro 404">404</h1>
+          <p class="error-status-label">PAGE NOT FOUND // SINAL ANALÓGICO AUSENTE</p>
+          <a href="index.html" class="error-back-link" id="go-back-btn" role="button">
+            [-] GO BACK
+          </a>
+        </div>
+
+        <!-- Rodapé do Monitor 404 -->
+        <footer style="display: flex; justify-content: space-between; font-size: 0.65rem; color: #555555; letter-spacing: 2px;">
+          <span>V-HOLD: OFF</span>
+          <span>NTSC // 60HZ</span>
+        </footer>
+
+        <!-- ============================================================
+             SEGUNDA ETAPA: PERDA DE SINAL — BARRAS DE CORES SMPTE
+             (Cores de arco-íris ativadas exclusivamente nesta animação)
+             ============================================================ -->
+        <div class="smpte-bars-overlay" id="smpte-overlay" role="alert" aria-label="Perda de sinal: Padrão SMPTE">
+          <div class="smpte-top-row">
+            <div class="smpte-bar bar-white"></div>
+            <div class="smpte-bar bar-yellow"></div>
+            <div class="smpte-bar bar-cyan"></div>
+            <div class="smpte-bar bar-green"></div>
+            <div class="smpte-bar bar-magenta"></div>
+            <div class="smpte-bar bar-red"></div>
+            <div class="smpte-bar bar-blue"></div>
+          </div>
+          <div class="smpte-bottom-row">
+            <div class="sub-1"></div>
+            <div class="sub-2"></div>
+            <div class="sub-3"></div>
+            <div class="sub-4"></div>
+            <div class="sub-5"></div>
+            <div class="sub-6"></div>
+            <div class="sub-7"></div>
+          </div>
+
+          <div class="no-signal-badge">
+            PERDA DE SINAL // SEM TRANSMISSÃO<br>
+            <span style="font-size: 0.75rem; font-weight: normal; letter-spacing: 2px; color: #aaaaaa;">
+              [ CLIQUE PARA RESTAURAR ]
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Script da Página 404 -->
+  <script src="js/404.js" defer></script>
+</body>
+</html>

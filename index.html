@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Luccas Diazzi — Portfólio Interativo</title>
+  <meta name="description" content="Portfólio pessoal e técnico de Luccas Diazzi. Estudante de TI, focado em hardware, manutenção de equipamentos e suporte técnico.">
+  <meta name="theme-color" content="#050505">
+
+  <!-- Google Fonts: Oswald (conforme especificado) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap" rel="stylesheet">
+
+  <!-- Folha de Estilos Principal -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Camada Global de Ruído Estático Analógico -->
+  <div class="crt-noise" aria-hidden="true"></div>
+
+  <!-- Cenário 3D -->
+  <main class="scene-container" id="scene-viewport">
+    
+    <!-- Superfície da Mesa com Iluminação Ambiente -->
+    <div class="desk-surface" aria-hidden="true"></div>
+
+    <!-- Câmera Virtual Cinemática -->
+    <div class="camera-rig camera--initial" id="camera-rig">
+      
+      <div class="hardware-setup">
+
+        <!-- ================================================================
+             MONITOR CRT (Elemento Principal)
+             ================================================================ -->
+        <section class="crt-monitor-case" aria-label="Monitor de Computador CRT">
+          
+          <div class="crt-bezel-inner">
+            <div class="crt-screen" id="crt-screen">
+              
+              <!-- Efeitos de Tubo de Imagem: Scanlines e Reflexo de Vidro -->
+              <div class="crt-overlay" aria-hidden="true"></div>
+
+              <!-- Camada de Glitch e Interferência de Vídeo -->
+              <div class="glitch-flash-layer" id="glitch-layer" aria-hidden="true"></div>
+
+              <!-- ============================================================
+                   ETAPA 1: TELA DE INICIALIZAÇÃO — PROTETOR DE TELA LD (ESTILO DVD)
+                   ============================================================ -->
+              <div class="boot-screen-layer" id="boot-screen-layer" role="region" aria-label="Animação de Inicialização">
+                <div class="dvd-bounce-stage" id="dvd-stage">
+                  <div class="ld-bouncing-logo" id="ld-logo">
+                    LD <span class="sub-tag">TECH</span>
+                  </div>
+                </div>
+
+                <!-- Botão de Pular Inicialização (Acessibilidade) -->
+                <button type="button" class="skip-intro-btn" id="skip-boot-btn" aria-label="Pular animação inicial">
+                  PULAR INTRO [ESPAÇO]
+                </button>
+              </div>
+
+              <!-- ============================================================
+                   ETAPA 2 & 3: INTERFACE DO SISTEMA OPERACIONAL RETRÔ (OS)
+                   ============================================================ -->
+              <div class="os-interface-wrapper" id="os-interface" role="region" aria-label="Sistema Operacional LD">
+                
+                <!-- Barra de Status Superior (OSD) -->
+                <header class="os-status-bar">
+                  <div class="status-left">
+                    <span class="system-tag">SYS // LD-OS 98</span>
+                    <span class="session-counter" id="session-display">SESSION 00:00:00</span>
+                  </div>
+                  <div class="status-right">
+                    <span class="digital-clock" id="clock-display">00:00:00</span>
+                  </div>
+                </header>
+
+                <!-- Área Central: Carrossel 3D de Fitas Cassete -->
+                <div class="os-main-stage" id="carousel-stage">
+                  <p class="carousel-instruction-bar" aria-live="polite">
+                    USE O SCROLL OU ARRASTE PARA GIRAR // CLIQUE PARA ENTRAR
+                  </p>
+
+                  <div class="carousel-viewport" id="carousel-viewport" tabindex="0" role="region" aria-label="Navegador de Fitas Cassete">
+                    <div class="carousel-track" id="carousel-track">
+                      
+                      <!-- FITA 1: SOBRE MIM (Estilo Capa de Álbum Musical Experimental) -->
+                      <article class="carousel-card tape-about pos-center" data-index="0" id="card-0" tabindex="0" role="button" aria-label="Abrir fita Sobre mim: Luccas Diazzi">
+                        <div class="tape-case-art">
+                          <div class="album-header">
+                            <h2 class="album-title">LUCCAS DIAZZI</h2>
+                            <p class="album-subtitle">SIDE A // HARDWARE & SUPORTE</p>
+                          </div>
+                          <div class="album-graphic">
+                            <div class="album-monogram">LD</div>
+                          </div>
+                          <div class="album-footer">
+                            <span>REV. 2026</span>
+                            <span>[ ENTER ] SELECIONAR</span>
+                          </div>
+                        </div>
+                      </article>
+
+                      <!-- FITA 2: PORTFÓLIO (Estilo Equipamento Técnico / Fita de Dados) -->
+                      <article class="carousel-card tape-portfolio pos-right" data-index="1" id="card-1" tabindex="0" role="button" aria-label="Abrir fita Portfólio">
+                        <div class="tape-case-art">
+                          <div class="spec-header">
+                            <h2 class="spec-title">PORTFÓLIO</h2>
+                            <span class="spec-serial">DATA-909</span>
+                          </div>
+                          <div class="data-graphic">
+                            <div class="waveform-lines" aria-hidden="true"></div>
+                            <div class="tech-specs-list">
+                              <div>REPO: GITHUB</div>
+                              <div>CODE: DIAZZIEPEDRO</div>
+                              <div>TYPE: REPOSITÓRIOS</div>
+                            </div>
+                          </div>
+                          <div class="spec-footer">
+                            <span>SISTEMA DE ARQUIVOS</span>
+                          </div>
+                        </div>
+                      </article>
+
+                      <!-- FITA 3: CONTATO (Estilo Minimalista com Ícone de Comunicação) -->
+                      <article class="carousel-card tape-contact pos-left" data-index="2" id="card-2" tabindex="0" role="button" aria-label="Abrir fita Contato">
+                        <div class="tape-case-art">
+                          <div class="comm-header">
+                            <h2 class="comm-title">CONTATO</h2>
+                          </div>
+                          <div class="comm-graphic">
+                            <div class="comm-icon-box" aria-hidden="true">
+                              <!-- Ícone de Telefone/Comunicação SVG -->
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                              </svg>
+                            </div>
+                          </div>
+                          <div class="comm-footer">
+                            <span>FREQ: 142.80 MHZ</span>
+                            <span>DIRETO</span>
+                          </div>
+                        </div>
+                      </article>
+
+                    </div>
+                  </div>
+
+                  <!-- Controles Adicionais do Carrossel (Botões e Indicadores) -->
+                  <div class="carousel-controls-bar">
+                    <button type="button" class="carousel-nav-btn" id="btn-prev" aria-label="Fita Anterior">&lt; ANTERIOR</button>
+                    <div class="carousel-dots" id="carousel-dots" aria-hidden="true">
+                      <span class="carousel-dot active" data-dot="0"></span>
+                      <span class="carousel-dot" data-dot="1"></span>
+                      <span class="carousel-dot" data-dot="2"></span>
+                    </div>
+                    <button type="button" class="carousel-nav-btn" id="btn-next" aria-label="Próxima Fita">PRÓXIMO &gt;</button>
+                  </div>
+                </div>
+
+                <!-- ============================================================
+                     INTERFACE DAS SEÇÕES INTERNAS (SOBRE MIM, PORTFÓLIO, CONTATO)
+                     ============================================================ -->
+                <div class="section-view-overlay" id="section-view-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+                  
+                  <nav class="section-nav-header">
+                    <div class="section-breadcrumb">
+                      SISTEMA // <span id="section-title-display">SOBRE MIM</span>
+                    </div>
+                    <button type="button" class="section-back-btn" id="section-back-btn" aria-label="Voltar à seleção de fitas">
+                      [-] RETORNAR
+                    </button>
+                  </nav>
+
+                  <!-- Painel 1: Sobre mim -->
+                  <div class="section-content-panel is-visible" id="panel-about">
+                    <div class="about-grid-layout">
+                      <div class="profile-photo-wrapper">
+                        <!-- Imagem de Placeholder Fotográfico de Alta Qualidade -->
+                        <img 
+                          src="assets/images/profile-placeholder.jpg" 
+                          alt="Fotografia de perfil em preto e branco de Luccas Diazzi com equipamentos de hardware" 
+                          class="profile-photo-img"
+                          id="profile-img"
+                        >
+                        <div class="profile-photo-badge">ID: DIAZZI-L</div>
+                      </div>
+
+                      <div class="about-details-col">
+                        <h2 class="about-name-title">Luccas Diazzi</h2>
+                        <h3 class="about-role-subtitle">Técnico de TI</h3>
+                        
+                        <p class="about-bio-text">
+                          Atualmente, curso o segundo ano de Tecnologia da Informação na rede Raphael Di Santo Garcia. Sou apaixonado por equipamentos e tenho grande interesse em seguir carreira na área de hardware e manutenção. Busco uma oportunidade como técnico de equipamentos para desenvolver minhas habilidades, adquirir experiência prática e contribuir com a resolução de problemas técnicos.
+                        </p>
+
+                        <div class="about-skills-tags" aria-label="Competências técnicas">
+                          <span class="skill-tag">HARDWARE</span>
+                          <span class="skill-tag">MANUTENÇÃO PREVENTIVA</span>
+                          <span class="skill-tag">MONTAGEM E REPARO</span>
+                          <span class="skill-tag">DIAGNÓSTICO TÉCNICO</span>
+                          <span class="skill-tag">REDES BÁSICAS</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Painel 2: Portfólio -->
+                  <div class="section-content-panel" id="panel-portfolio">
+                    <div class="portfolio-minimal-layout">
+                      <div class="portfolio-header-block">
+                        <h2 class="portfolio-main-heading">PORTFÓLIO</h2>
+                        <p class="portfolio-sub-description">Repositórios e Projetos de Código</p>
+                      </div>
+
+                      <a 
+                        href="https://github.com/DiazziePedro" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        class="github-link-card" 
+                        id="github-external-link"
+                        aria-label="Abrir perfil de Luccas Diazzi no GitHub (abre em nova aba)"
+                      >
+                        <div class="github-icon-frame" aria-hidden="true">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+                          </svg>
+                        </div>
+                        <div class="github-info-block">
+                          <span class="github-title">GITHUB</span>
+                          <span class="github-url-text">github.com/DiazziePedro</span>
+                          <span class="github-action-indicator">LINK EXTERNO [↗]</span>
+                        </div>
+                      </a>
+                    </div>
+                  </div>
+
+                  <!-- Painel 3: Contato -->
+                  <div class="section-content-panel" id="panel-contact">
+                    <div class="contact-minimal-layout">
+                      <div class="contact-header-block">
+                        <h2 class="contact-main-heading">CONTATO</h2>
+                        <p class="contact-sub-description">Comunicação Direta por Correio Eletrônico</p>
+                      </div>
+
+                      <div class="email-contact-card">
+                        <div class="email-icon-frame" aria-hidden="true">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                          </svg>
+                        </div>
+                        <div class="email-info-block">
+                          <span class="email-label-text">ENDEREÇO DE E-MAIL</span>
+                          <a href="mailto:luccas.diazzi@gmail.com" class="email-address-link" id="email-link">
+                            luccas.diazzi@gmail.com
+                          </a>
+                          <button type="button" class="email-copy-btn" id="copy-email-btn" aria-label="Copiar endereço de e-mail">
+                            [ COPIAR E-MAIL ]
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Painel Inferior de Detalhes Físicos do Monitor -->
+          <div class="crt-control-panel">
+            <div class="crt-brand-badge">LD-909 ANALOG SYSTEM</div>
+            <div class="crt-knobs-group">
+              <div class="crt-knob" title="Brilho"></div>
+              <div class="crt-knob" title="Contraste"></div>
+              <div class="crt-power-indicator">
+                <span class="crt-led" aria-hidden="true"></span>
+                <span>PWR</span>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ================================================================
+             TOCA-FITAS (Aparelho Cassete Deck Físico)
+             ================================================================ -->
+        <aside class="tape-deck-unit" id="tape-deck-unit" aria-label="Aparelho Toca-Fitas Cassete">
+          
+          <div class="deck-header">
+            <span class="deck-model-tag">CASSETTE DECK CT-20</span>
+            <div class="deck-vu-meter" aria-hidden="true">
+              <span class="vu-bar active"></span>
+              <span class="vu-bar active"></span>
+              <span class="vu-bar active"></span>
+              <span class="vu-bar"></span>
+              <span class="vu-bar"></span>
+            </div>
+          </div>
+
+          <!-- Compartimento do Cassete com a Fita Emergindo -->
+          <div class="deck-compartment">
+            <div class="compartment-glass"></div>
+            <div class="compartment-scale"></div>
+
+            <div class="deck-spindles">
+              <div class="spindle"></div>
+              <div class="spindle"></div>
+            </div>
+
+            <!-- Fita Cassete com Nome Físico "Luccas Diazzi" -->
+            <div 
+              class="intro-cassette-wrapper tape--emerging" 
+              id="intro-cassette" 
+              tabindex="0" 
+              role="button" 
+              aria-label="Fita cassete de Luccas Diazzi. Clique para inserir no aparelho."
+            >
+              <div class="cassette-prompt-badge" id="cassette-prompt">CLIQUE PARA INSERIR [↓]</div>
+
+              <div class="cassette-shell">
+                <div class="cassette-spine-label">
+                  <span class="spine-artist-name">Luccas Diazzi</span>
+                  <span class="spine-tape-type">CHROME II</span>
+                </div>
+                <div class="cassette-window-zone">
+                  <div class="tape-hub"></div>
+                  <div class="tape-bridge">60 MIN</div>
+                  <div class="tape-hub"></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Botões Mecânicos do Deck -->
+          <div class="deck-controls" aria-hidden="true">
+            <div class="deck-btn" id="deck-btn-eject">EJECT</div>
+            <div class="deck-btn" id="deck-btn-rew">REW</div>
+            <div class="deck-btn pressed" id="deck-btn-play">PLAY</div>
+            <div class="deck-btn" id="deck-btn-stop">STOP</div>
+          </div>
+
+        </aside>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Lógica JavaScript Separada -->
+  <script src="js/script.js" defer></script>
+</body>
+</html>
